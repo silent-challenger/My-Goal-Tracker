@@ -6,16 +6,42 @@ Something to track my progress and completion of my projects
   <meta charset="UTF-8">
   <title>Reward Tracker</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    .milestone { margin: 10px 0; }
-    .done { color: green; font-weight: bold; }
-    button { padding: 10px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+    button {
+      padding: 12px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+    }
+    .undo {
+      background-color: red;
+      color: white;
+    }
+    .undo:hover {
+      background-color: darkred;
+    }
+    .milestone {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    .done {
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h1>Consistency Reward Tracker</h1>
   <p>Click the button when you've completed your task for today:</p>
- <div style="text-align: center;">
+
   <button onclick="markToday()">✔ Mark Today Done</button>
   <button onclick="markYesterday()">✔ Mark Yesterday Done</button>
 
@@ -23,22 +49,19 @@ Something to track my progress and completion of my projects
     <button class="undo" onclick="undoToday()">↩️ Undo Today</button>
     <button class="undo" onclick="undoYesterday()">↩️ Undo Yesterday</button>
   </div>
-</div>
 
-<p id="streakDisplay" style="text-align: center;"></p>
-
-<div class="milestone" id="reward1">🎁 7 Days: Not yet</div>
-<div class="milestone" id="reward2">🎁 21 Days: Not yet</div>
-<div class="milestone" id="reward3">🎁 49 Days: Not yet</div>
   <p id="streakDisplay"></p>
 
   <div class="milestone" id="reward1">🎁 7 Days: Not yet</div>
   <div class="milestone" id="reward2">🎁 21 Days: Not yet</div>
   <div class="milestone" id="reward3">🎁 49 Days: Not yet</div>
-   <div class="milestone" id="reward4">🎁 105 Days: Not yet</div>
 
   <script>
     const today = new Date().toDateString();
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(new Date().getDate() - 1);
+    const yesterday = yesterdayDate.toDateString();
+
     let streak = parseInt(localStorage.getItem("streak") || "0");
     let lastDate = localStorage.getItem("lastDate");
 
@@ -53,13 +76,56 @@ Something to track my progress and completion of my projects
       }
     }
 
+    function markYesterday() {
+      if (lastDate !== yesterday && lastDate !== today) {
+        streak++;
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("lastDate", yesterday);
+        updateDisplay();
+      } else {
+        alert("Already marked yesterday or today!");
+      }
+    }
+
+    function undoToday() {
+      if (lastDate === today && streak > 0) {
+        streak--;
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("lastDate", "");
+        updateDisplay();
+      } else {
+        alert("Today wasn't marked yet.");
+      }
+    }
+
+    function undoYesterday() {
+      if (lastDate === yesterday && streak > 0) {
+        streak--;
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("lastDate", "");
+        updateDisplay();
+      } else {
+        alert("Yesterday wasn't marked or cannot undo.");
+      }
+    }
+
     function updateDisplay() {
       document.getElementById("streakDisplay").textContent = `Current streak: ${streak} day(s)`;
 
-      if (streak >= 7) document.getElementById("reward1").innerHTML = "🎉 7 Days: <span class='done'>$100 reward unlocked!</span>";
-      if (streak >= 21) document.getElementById("reward2").innerHTML = "🎉 21 Days: <span class='done'>$200 reward unlocked!</span>";
-      if (streak >= 49) document.getElementById("reward3").innerHTML = "🎉 49 Days: <span class='done'>$400 reward unlocked!</span>";
-      if (streak >= 105) document.getElementById("reward3").innerHTML = "🎉 105 Days: <span class='done'>$800 reward unlocked!</span>";
+      document.getElementById("reward1").innerHTML =
+        streak >= 7
+          ? "🎉 7 Days: <span class='done'>$100 reward unlocked!</span>"
+          : "🎁 7 Days: Not yet";
+
+      document.getElementById("reward2").innerHTML =
+        streak >= 21
+          ? "🎉 21 Days: <span class='done'>$200 reward unlocked!</span>"
+          : "🎁 21 Days: Not yet";
+
+      document.getElementById("reward3").innerHTML =
+        streak >= 49
+          ? "🎉 49 Days: <span class='done'>$300 reward unlocked!</span>"
+          : "🎁 49 Days: Not yet";
     }
 
     updateDisplay();
